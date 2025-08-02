@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогресс по весу</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .progress-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            width: 180px;
+            height: 180px;
+        }
+
+        .progress-ring__circle {
+            stroke: #f1eaf6;
+            stroke-width: 12;
+            fill: transparent;
+            r: 78;
+            cx: 90;
+            cy: 90;
+        }
+
+        .progress-ring__progress {
+            stroke: #c0accf;
+            stroke-width: 12;
+            fill: transparent;
+            r: 78;
+            cx: 90;
+            cy: 90;
+            stroke-dasharray: 490.088;
+            stroke-dashoffset: 490.088;
+            transition: stroke-dashoffset 1.5s ease-in-out;
+            stroke-linecap: round;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-percentage {
+            font-size: 28px;
+            font-weight: 600;
+            color: #c0accf;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: #888;
+            margin: 4px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .weight-info {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .current-weight {
+            font-weight: 500;
+            color: #c0accf;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .progress-text {
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <svg class="progress-ring" width="180" height="180">
+            <circle class="progress-ring__circle"></circle>
+            <circle class="progress-ring__progress" id="progress"></circle>
+        </svg>
+        
+        <div class="progress-text">
+            <div class="progress-percentage" id="percentage">0%</div>
+            <div class="progress-label">прогресс</div>
+        </div>
+        
+        <div class="weight-info">
+            <span class="current-weight" id="current-weight">79.7</span> из <span id="target-weight">70</span> кг
+        </div>
+    </div>
+
+    <script>
+        // 🎯 НАСТРОЙКИ - МЕНЯЙ ТОЛЬКО ЭТИ ЗНАЧЕНИЯ:
+        const startWeight = 80;     // Начальный вес
+        const currentWeight = 79.7; // Текущий вес  
+        const targetWeight = 70;    // Целевой вес
+
+        // Расчет прогресса (твоя формула)
+        function calculateProgress() {
+            const totalWeightLoss = startWeight - targetWeight;
+            const currentWeightLoss = startWeight - currentWeight;
+            const progress = Math.round((currentWeightLoss / totalWeightLoss) * 100);
+            return Math.max(0, Math.min(100, progress)); // Ограничиваем от 0 до 100%
+        }
+
+        // Анимация прогресс-бара
+        function animateProgress() {
+            const progress = calculateProgress();
+            const circle = document.getElementById('progress');
+            const percentageElement = document.getElementById('percentage');
+            const currentWeightElement = document.getElementById('current-weight');
+            const targetWeightElement = document.getElementById('target-weight');
+            
+            // Обновляем текст
+            currentWeightElement.textContent = currentWeight;
+            targetWeightElement.textContent = targetWeight;
+            
+            // Длина окружности
+            const circumference = 2 * Math.PI * 78;
+            const offset = circumference - (progress / 100 * circumference);
+            
+            // Анимация с задержкой
+            setTimeout(() => {
+                circle.style.strokeDashoffset = offset;
+                
+                // Анимация цифр
+                let currentPercentage = 0;
+                const increment = progress / 60; // 60 кадров анимации
+                
+                const timer = setInterval(() => {
+                    currentPercentage += increment;
+                    if (currentPercentage >= progress) {
+                        currentPercentage = progress;
+                        clearInterval(timer);
+                    }
+                    percentageElement.textContent = Math.round(currentPercentage) + '%';
+                }, 25);
+                
+            }, 300);
+        }
+
+        // Запуск анимации при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(animateProgress, 100);
+        });
+    </script>
+</body>
+</html>
